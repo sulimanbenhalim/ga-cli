@@ -28,19 +28,6 @@ ga-cli --version
 ga-cli --help
 ```
 
-### Using Homebrew (macOS/Linux)
-
-```bash
-# Add the tap
-brew tap sulimanbenhalim/ga-cli
-
-# Install
-brew install ga-cli
-
-# Use it
-ga-cli --version
-```
-
 ### Using Docker
 
 ```bash
