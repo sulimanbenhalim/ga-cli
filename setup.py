@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="ga-cli",
+    name="ga4-cli",
     version=__version__,
     author="Suliman Ben Halim",
     author_email="suliman.benhalim@binary.ly",
