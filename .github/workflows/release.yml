@@ -1,0 +1,148 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v0.1.0, v0.2.0, etc.
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: ga-cli
+            asset_name: ga-cli-linux-amd64
+          - os: macos-latest
+            artifact_name: ga-cli
+            asset_name: ga-cli-macos-amd64
+          - os: windows-latest
+            artifact_name: ga-cli.exe
+            asset_name: ga-cli-windows-amd64.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller ga-cli.spec
+
+      - name: Compress binary (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd dist
+          tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.artifact_name }}
+
+      - name: Compress binary (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd dist
+          Compress-Archive -Path ${{ matrix.artifact_name }} -DestinationPath ${{ matrix.asset_name }}.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            dist/${{ matrix.asset_name }}.tar.gz
+            dist/${{ matrix.asset_name }}.zip
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            GA CLI ${{ steps.get_version.outputs.VERSION }}
+
+            ## Installation
+
+            ### Download Binary
+            Download the appropriate binary for your platform below.
+
+            ### Using pip
+            ```bash
+            pip install ga4-cli==${{ steps.get_version.outputs.VERSION }}
+            ```
+
+            ### Using Homebrew
+            ```bash
+            brew tap sulimanbenhalim/ga-cli
+            brew install ga-cli
+            ```
+
+            ## What's Changed
+            See CHANGELOG.md for details.
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/ga-cli-linux-amd64/ga-cli-linux-amd64.tar.gz
+          asset_name: ga-cli-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/ga-cli-macos-amd64/ga-cli-macos-amd64.tar.gz
+          asset_name: ga-cli-macos-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/ga-cli-windows-amd64.exe/ga-cli-windows-amd64.exe.zip
+          asset_name: ga-cli-windows-amd64.exe.zip
+          asset_content_type: application/zip

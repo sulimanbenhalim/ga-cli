@@ -28,6 +28,50 @@ ga-cli --version
 ga-cli --help
 ```
 
+### Using Homebrew (macOS/Linux)
+
+```bash
+# Add the tap
+brew tap sulimanbenhalim/ga-cli
+
+# Install
+brew install ga-cli
+
+# Use it
+ga-cli --version
+```
+
+### Using Docker
+
+```bash
+# Pull from Docker Hub
+docker pull sulimanbenhalim/ga-cli:latest
+
+# Or build locally
+docker build -t ga-cli .
+
+# Run with credentials mounted
+docker run -v /path/to/credentials.json:/credentials.json \
+  -v ~/.ga-cli:/root/.ga-cli \
+  ga-cli accounts list --credentials /credentials.json
+```
+
+### Download Binary (No Python Required)
+
+Download standalone binaries from [GitHub Releases](https://github.com/sulimanbenhalim/ga-cli/releases):
+
+**Linux/macOS:**
+```bash
+# Download and extract
+curl -L -o ga-cli.tar.gz https://github.com/sulimanbenhalim/ga-cli/releases/latest/download/ga-cli-linux-amd64.tar.gz
+tar -xzf ga-cli.tar.gz
+chmod +x ga-cli
+sudo mv ga-cli /usr/local/bin/
+```
+
+**Windows:**
+Download `ga-cli-windows-amd64.exe.zip` from the releases page, extract, and run.
+
 ### From source
 
 ```bash
