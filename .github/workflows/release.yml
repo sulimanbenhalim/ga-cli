@@ -11,6 +11,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         include:
           - os: ubuntu-latest
@@ -25,10 +26,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -55,7 +56,7 @@ jobs:
           Compress-Archive -Path ${{ matrix.artifact_name }} -DestinationPath ${{ matrix.asset_name }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
           path: |
@@ -71,10 +72,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
@@ -85,14 +86,10 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release with Binaries
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
             GA CLI ${{ steps.get_version.outputs.VERSION }}
 
@@ -106,43 +103,13 @@ jobs:
             pip install ga4-cli==${{ steps.get_version.outputs.VERSION }}
             ```
 
-            ### Using Homebrew
-            ```bash
-            brew tap sulimanbenhalim/ga-cli
-            brew install ga-cli
-            ```
-
             ## What's Changed
-            See CHANGELOG.md for details.
+            See the commit history for details.
+          files: |
+            artifacts/ga-cli-linux-amd64/ga-cli-linux-amd64.tar.gz
+            artifacts/ga-cli-macos-amd64/ga-cli-macos-amd64.tar.gz
+            artifacts/ga-cli-windows-amd64.exe/ga-cli-windows-amd64.exe.zip
           draft: false
           prerelease: false
-
-      - name: Upload Linux Binary
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/ga-cli-linux-amd64/ga-cli-linux-amd64.tar.gz
-          asset_name: ga-cli-linux-amd64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload macOS Binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/ga-cli-macos-amd64/ga-cli-macos-amd64.tar.gz
-          asset_name: ga-cli-macos-amd64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Windows Binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/ga-cli-windows-amd64.exe/ga-cli-windows-amd64.exe.zip
-          asset_name: ga-cli-windows-amd64.exe.zip
-          asset_content_type: application/zip
