@@ -2,6 +2,8 @@
 
 A command-line interface tool for managing Google Analytics 4 properties, accounts, and data streams.
 
+**Note**: The package is published as `ga4-cli` on PyPI, but the command is `ga-cli`.
+
 ## Features
 
 - List and manage Google Analytics accounts
@@ -13,17 +15,25 @@ A command-line interface tool for managing Google Analytics 4 properties, accoun
 
 ## Installation
 
+### Using pip
+
+```bash
+pip install ga4-cli
+```
+
+After installation, the command is available as `ga-cli`:
+
+```bash
+ga-cli --version
+ga-cli --help
+```
+
 ### From source
 
 ```bash
+git clone https://github.com/sulimanbenhalim/ga-cli.git
 cd ga-cli
 pip install -e .
-```
-
-### Using pip (when published)
-
-```bash
-pip install ga-cli
 ```
 
 ## Setup
@@ -149,7 +159,7 @@ Most list and get commands support:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/sulimanbenhalim/ga-cli.git
 cd ga-cli
 
 # Create virtual environment
@@ -191,11 +201,12 @@ ga-cli/
 
 ## Requirements
 
-- Python 3.7+
+- Python 3.8+
 - Click 8.0+
 - google-analytics-admin 0.27.0+
 - google-auth 2.0+
 - rich 13.0+
+- pytz 2023.3+
 
 ## License
 
