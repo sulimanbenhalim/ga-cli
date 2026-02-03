@@ -12,6 +12,7 @@ class GaCli < Formula
   def install
     venv = virtualenv_create(libexec, Formula["python@3.11"].bin/"python3.11")
     venv.pip_install "ga4-cli==0.1.1"
+    bin.install_symlink libexec/"bin/ga-cli"
   end
 
   test do
