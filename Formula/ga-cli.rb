@@ -10,8 +10,8 @@ class GaCli < Formula
   depends_on "python@3.11"
 
   def install
-    virtualenv_create(libexec, "python3.11")
-    system libexec/"bin/pip", "install", buildpath
+    venv = virtualenv_create(libexec, Formula["python@3.11"].bin/"python3.11")
+    venv.pip_install "ga4-cli==0.1.1"
   end
 
   test do
