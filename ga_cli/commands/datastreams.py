@@ -1,5 +1,6 @@
 """Data stream management commands"""
 
+import builtins
 import click
 from google.analytics.admin_v1alpha.types import DataStream
 from ga_cli.decorators import with_client
@@ -118,7 +119,7 @@ def create(ctx, property_id, name, url):
 @retry_on_transient_error()
 def _list_datastreams_with_retry(client, property_id):
     """List data streams with retry logic"""
-    return list(client.list_data_streams(parent=f"properties/{property_id}"))
+    return builtins.list(client.list_data_streams(parent=f"properties/{property_id}"))
 
 
 @retry_on_transient_error()

@@ -1,5 +1,6 @@
 """Property management commands"""
 
+import builtins
 import click
 from google.analytics.admin_v1alpha.types import Property
 from ga_cli.decorators import with_client
@@ -122,7 +123,7 @@ def delete(ctx, property_id):
 @retry_on_transient_error()
 def _list_properties_with_retry(client, request):
     """List properties with retry logic"""
-    return list(client.list_properties(request=request))
+    return builtins.list(client.list_properties(request=request))
 
 
 @retry_on_transient_error()

@@ -1,5 +1,6 @@
 """Account management commands"""
 
+import builtins
 import click
 from ga_cli.decorators import with_client
 from ga_cli.formatters.table import format_table
@@ -72,7 +73,7 @@ def get(ctx, account_id, format):
 @retry_on_transient_error()
 def _list_accounts_with_retry(client):
     """List accounts with retry logic"""
-    return list(client.list_accounts())
+    return builtins.list(client.list_accounts())
 
 
 @retry_on_transient_error()
